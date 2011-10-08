@@ -18,8 +18,8 @@ public:
     ~MainWindow();
 
     void setTime(QTime time);
-    void start();
-    void stop();
+    void setCountDown(bool countDown);
+    void setShowSeconds(bool showSeconds);
 
 protected:
     void keyPressEvent(QKeyEvent *event);
@@ -28,6 +28,8 @@ private slots:
     void timeout();
 
 private :
+    void start();
+    void stop();
     void update();
     void setColor(QColor color);
 
@@ -35,6 +37,8 @@ private:
     Ui::MainWindow *ui;
     QTimer _timer;
     QTime _time;
+    bool _countDown;
+    bool _showSeconds;
 };
 
 #endif // MAINWINDOW_H

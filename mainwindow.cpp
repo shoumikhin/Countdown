@@ -6,6 +6,8 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , _countDown(true)
+    , _showSeconds(true)
 {
     ui->setupUi(this);
     update();
@@ -19,6 +21,20 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::setTime(QTime time)
 {
     _time = time;
+    stop();
+    update();
+}
+
+void MainWindow::setCountDown(bool countDown)
+{
+    _countDown = countDown;
+    stop();
+    update();
+}
+
+void MainWindow::setShowSeconds(bool showSeconds)
+{
+    _showSeconds = showSeconds;
     stop();
     update();
 }
@@ -46,10 +62,13 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::timeout()
 {
-    if (_time.second() || _time.minute() || _time.hour())
-        _time = _time.addSecs(-1);
+    if (_countDown)
+        if (_time.second() || _time.minute() || _time.hour())
+            _time = _time.addSecs(-1);
+        else
+            setColor(Qt::red);
     else
-        setColor(Qt::red);
+        _time = _time.addSecs(1);
 
     update();
 }
@@ -68,8 +87,16 @@ void MainWindow::stop()
 
 void MainWindow::update()
 {
-    ui->lcdNumber->setDigitCount(_time.hour() ? 8 : 5);
-    ui->lcdNumber->display(_time.toString("hh:mm:ss"));
+    if (_showSeconds)
+    {
+        ui->lcdNumber->setDigitCount(_time.hour() ? 8 : 5);
+        ui->lcdNumber->display(_time.toString("hh:mm:ss"));
+    }
+    else
+    {
+        ui->lcdNumber->setDigitCount(5);
+        ui->lcdNumber->display(_time.toString("hh:mm"));
+    }
 }
 
 void MainWindow::setColor(QColor color)

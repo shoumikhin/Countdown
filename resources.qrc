@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/images">
-        <file alias="icon">icon.png</file>
+        <file>countdown.png</file>
+        <file>seconds.png</file>
+        <file>counter.png</file>
     </qresource>
 </RCC>
