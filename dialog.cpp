@@ -11,9 +11,9 @@ Dialog::Dialog(QWidget *parent)
 
 void Dialog::accept()
 {
-    _window->setTime(ui->timeEdit->time());
     _window->setCountDown(ui->countdown->isChecked());
     _window->setShowSeconds(ui->seconds->isChecked());
+    _window->setTime(ui->timeEdit->time(), ui->untilLimit->isChecked());
     _window->showFullScreen();
 }
 

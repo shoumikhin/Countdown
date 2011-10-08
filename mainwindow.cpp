@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , _countDown(true)
+    , _countToTime(false)
     , _showSeconds(true)
     , _indicator(COLUMN)
 {
@@ -28,10 +29,38 @@ MainWindow::MainWindow(QWidget *parent)
     stop(PAUSE_COLOR);
 }
 
-void MainWindow::setTime(QTime time)
+QTime MainWindow::timeDifference(QTime end, QTime beginning)
 {
-    _time = time;
-    stop(PAUSE_COLOR);
+    QTime ret;
+
+    int seconds = beginning.secsTo(end);
+
+    if (seconds < 0)
+        seconds = 24 * 3600 + seconds;
+
+    int hours = seconds / 3600;
+    int minutes = (seconds - 3600 * hours) / 60;
+
+    ret.setHMS(hours, minutes, seconds % 60);
+
+    return ret;
+}
+
+void MainWindow::setTime(QTime time, bool countToTime)
+{
+    _countToTime = countToTime;
+
+    if (_countToTime)
+    {
+        _timeLimit = time;
+        _time = timeDifference(_timeLimit, QTime::currentTime());
+        start();
+    }
+    else
+    {
+        _time = time;
+        stop(PAUSE_COLOR);
+    }
 }
 
 void MainWindow::setCountDown(bool countDown)
@@ -63,7 +92,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             if (_timer.isActive())
                 stop(PAUSE_COLOR);
             else
+            {
+                if (_countToTime)
+                    _time = timeDifference(_timeLimit, QTime::currentTime());
+
                 start();
+            }
 
             break;
     }
@@ -79,7 +113,10 @@ void MainWindow::timeout()
             if (_time.second() || _time.minute() || _time.hour())
                 _time = _time.addSecs(-1);
             else
+            {
                 stop(STOP_COLOR);
+                _countToTime = false;
+            }
         else
             _time = _time.addSecs(1);
     }

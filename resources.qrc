@@ -3,5 +3,6 @@
         <file>countdown.png</file>
         <file>seconds.png</file>
         <file>counter.png</file>
+        <file>alarm.png</file>
     </qresource>
 </RCC>

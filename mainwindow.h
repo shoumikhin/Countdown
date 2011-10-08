@@ -17,7 +17,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void setTime(QTime time);
+    void setTime(QTime time, bool countToTime = false);
     void setCountDown(bool countDown);
     void setShowSeconds(bool showSeconds);
 
@@ -28,6 +28,7 @@ private slots:
     void timeout();
 
 private :
+    QTime timeDifference(QTime end, QTime beginning);
     void start();
     void stop(QColor color);
     void update();
@@ -36,8 +37,9 @@ private :
 private:
     Ui::MainWindow *ui;
     QTimer _timer;
-    QTime _time;
+    QTime _time, _timeLimit;
     bool _countDown;
+    bool _countToTime;
     bool _showSeconds;
     QChar _indicator;
 };
