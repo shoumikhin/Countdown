@@ -2,6 +2,7 @@
 #define DIALOG_H
 
 #include <QDialog>
+#include <QColorDialog>
 
 #include "mainwindow.h"
 
@@ -20,9 +21,13 @@ public:
 public slots:
     void accept();
 
+private slots:
+    void changePalette(bool);
+
 private:
     Ui::Dialog *ui;
     MainWindow *_window;
+    QColorDialog *_colorDialog;
 };
 
 #endif // DIALOG_H

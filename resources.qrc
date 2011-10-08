@@ -4,5 +4,6 @@
         <file>seconds.png</file>
         <file>counter.png</file>
         <file>alarm.png</file>
+        <file>palette.png</file>
     </qresource>
 </RCC>

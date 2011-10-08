@@ -20,6 +20,7 @@ public:
     void setTime(QTime time, bool countToTime = false);
     void setCountDown(bool countDown);
     void setShowSeconds(bool showSeconds);
+    void setColorPalette(QColor foreground, QColor background);
 
 protected:
     void keyPressEvent(QKeyEvent *event);

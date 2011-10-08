@@ -4,9 +4,12 @@
 Dialog::Dialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::Dialog)
-    , _window(new MainWindow)
+    , _window(new MainWindow(parent))
+    , _colorDialog(new QColorDialog(parent))
 {
     ui->setupUi(this);
+
+    connect(ui->options, SIGNAL(toggled(bool)), this, SLOT(changePalette(bool)));
 }
 
 void Dialog::accept()
@@ -17,8 +20,15 @@ void Dialog::accept()
     _window->showFullScreen();
 }
 
+void Dialog::changePalette(bool variant)
+{
+    if (variant)
+        _window->setColorPalette(Qt::white, Qt::black);
+    else
+        _window->setColorPalette(Qt::black, Qt::white);
+}
+
 Dialog::~Dialog()
 {
     delete ui;
-    delete _window;
 }

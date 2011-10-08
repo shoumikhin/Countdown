@@ -6,7 +6,8 @@
 
 namespace
 {
-static QColor RUN_COLOR = Qt::black;
+static QColor FG_COLOR = Qt::black;
+static QColor BG_COLOR = Qt::white;
 static QColor PAUSE_COLOR = Qt::darkBlue;
 static QColor STOP_COLOR = Qt::red;
 static QChar COLUMN = QChar(':');
@@ -73,6 +74,19 @@ void MainWindow::setShowSeconds(bool showSeconds)
 {
     _showSeconds = showSeconds;
     stop(PAUSE_COLOR);
+}
+
+void MainWindow::setColorPalette(QColor foreground, QColor background)
+{
+    FG_COLOR = foreground;
+    BG_COLOR = background;
+
+    QPalette palette;
+
+    palette.setColor(QPalette::Foreground, FG_COLOR);
+    palette.setColor(QPalette::Window, BG_COLOR);
+    ui->lcdNumber->setPalette(palette);
+    setPalette(palette);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -142,7 +156,7 @@ void MainWindow::timeout()
 void MainWindow::start()
 {
     _timer.start();
-    setColor(RUN_COLOR);
+    setColor(FG_COLOR);
     update();
 }
 
