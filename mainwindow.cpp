@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QEvent>
 #include <QKeyEvent>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -41,6 +42,8 @@ void MainWindow::setShowSeconds(bool showSeconds)
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
+    int j = event->key();
+
     switch (event->key())
     {
         case Qt::Key_Escape :
@@ -50,6 +53,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             break;
 
         case Qt::Key_Space :
+        case Qt::Key_Enter :
+        case Qt::Key_Return :
 
             if (_timer.isActive())
                 stop();
