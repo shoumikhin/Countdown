@@ -94,7 +94,20 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             else
             {
                 if (_countToTime)
-                    _time = timeDifference(_timeLimit, QTime::currentTime());
+                {
+                    QTime diff = timeDifference(_timeLimit, QTime::currentTime());
+
+                    if (diff < _time)
+                        _time = diff;
+                    else
+                    {
+                        _time.setHMS(0, 0, 0);
+                        stop(STOP_COLOR);
+                        _countToTime = false;
+
+                        break;
+                    }
+                }
 
                 start();
             }
