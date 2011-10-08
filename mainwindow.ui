@@ -10,6 +10,9 @@
     <height>121</height>
    </rect>
   </property>
+  <property name="cursor">
+   <cursorShape>BlankCursor</cursorShape>
+  </property>
   <property name="windowTitle">
    <string>Countdown</string>
   </property>
