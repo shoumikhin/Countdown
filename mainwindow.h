@@ -29,7 +29,7 @@ private slots:
 
 private :
     void start();
-    void stop();
+    void stop(QColor color);
     void update();
     void setColor(QColor color);
 
@@ -39,6 +39,7 @@ private:
     QTime _time;
     bool _countDown;
     bool _showSeconds;
+    QChar _indicator;
 };
 
 #endif // MAINWINDOW_H

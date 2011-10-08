@@ -4,46 +4,50 @@
 #include <QEvent>
 #include <QKeyEvent>
 
+namespace
+{
+static QColor RUN_COLOR = Qt::black;
+static QColor PAUSE_COLOR = Qt::darkBlue;
+static QColor STOP_COLOR = Qt::red;
+static QChar COLUMN = QChar(':');
+static QChar SPACE = QChar(' ');
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , _countDown(true)
     , _showSeconds(true)
+    , _indicator(COLUMN)
 {
     ui->setupUi(this);
-    update();
 
-    _timer.setInterval(1000);
+    _timer.setInterval(500);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(timeout()));
 
-    stop();
+    stop(PAUSE_COLOR);
 }
 
 void MainWindow::setTime(QTime time)
 {
     _time = time;
-    stop();
-    update();
+    stop(PAUSE_COLOR);
 }
 
 void MainWindow::setCountDown(bool countDown)
 {
     _countDown = countDown;
-    stop();
-    update();
+    stop(PAUSE_COLOR);
 }
 
 void MainWindow::setShowSeconds(bool showSeconds)
 {
     _showSeconds = showSeconds;
-    stop();
-    update();
+    stop(PAUSE_COLOR);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-    int j = event->key();
-
     switch (event->key())
     {
         case Qt::Key_Escape :
@@ -57,7 +61,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         case Qt::Key_Return :
 
             if (_timer.isActive())
-                stop();
+                stop(PAUSE_COLOR);
             else
                 start();
 
@@ -67,13 +71,20 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::timeout()
 {
-    if (_countDown)
-        if (_time.second() || _time.minute() || _time.hour())
-            _time = _time.addSecs(-1);
+    if (COLUMN == _indicator)
+    {
+        _indicator = SPACE;
+
+        if (_countDown)
+            if (_time.second() || _time.minute() || _time.hour())
+                _time = _time.addSecs(-1);
+            else
+                stop(STOP_COLOR);
         else
-            setColor(Qt::red);
+            _time = _time.addSecs(1);
+    }
     else
-        _time = _time.addSecs(1);
+        _indicator = COLUMN;
 
     update();
 }
@@ -81,13 +92,16 @@ void MainWindow::timeout()
 void MainWindow::start()
 {
     _timer.start();
-    setColor(Qt::black);
+    setColor(RUN_COLOR);
+    update();
 }
 
-void MainWindow::stop()
+void MainWindow::stop(QColor color)
 {
     _timer.stop();
-    setColor(Qt::darkBlue);
+    _indicator = COLUMN;
+    setColor(color);
+    update();
 }
 
 void MainWindow::update()
@@ -95,12 +109,13 @@ void MainWindow::update()
     if (_showSeconds)
     {
         ui->lcdNumber->setDigitCount(_time.hour() ? 8 : 5);
-        ui->lcdNumber->display(_time.toString("hh:mm:ss"));
+        ui->lcdNumber->display(_time.toString(QString("hh%1mm%1ss").arg(_indicator)));
+
     }
     else
     {
         ui->lcdNumber->setDigitCount(5);
-        ui->lcdNumber->display(_time.toString("hh:mm"));
+        ui->lcdNumber->display(_time.toString(QString("hh%1mm").arg(_indicator)));
     }
 }
 
