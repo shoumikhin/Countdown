@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>426</width>
+    <width>344</width>
     <height>40</height>
    </rect>
   </property>
@@ -90,7 +90,7 @@
    <item>
     <widget class="QToolButton" name="untilLimit">
      <property name="toolTip">
-      <string>Count down from now to the time's been set.</string>
+      <string>Count down from now to the time's been set</string>
      </property>
      <property name="text">
       <string>...</string>
@@ -100,6 +100,9 @@
        <normaloff>:/images/alarm.png</normaloff>:/images/alarm.png</iconset>
      </property>
      <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
       <bool>true</bool>
      </property>
     </widget>
@@ -139,6 +142,9 @@
      <property name="checkable">
       <bool>true</bool>
      </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>
@@ -163,7 +169,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Close|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

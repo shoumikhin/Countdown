@@ -14,6 +14,7 @@ Dialog::Dialog(QWidget *parent)
 
 void Dialog::accept()
 {
+    changePalette(ui->options->isChecked());
     _window->setCountDown(ui->countdown->isChecked());
     _window->setShowSeconds(ui->seconds->isChecked());
     _window->setTime(ui->timeEdit->time(), ui->untilLimit->isChecked());
