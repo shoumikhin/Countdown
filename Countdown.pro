@@ -7,8 +7,8 @@
 QT       += core gui
 
 TARGET = countdown
-TEMPLATE = app
 
+TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -24,3 +24,7 @@ RESOURCES += \
     resources.qrc
 
 RC_FILE = countdown.rc
+
+TRANSLATIONS = countdown_ru.ts
+CODECFORTR = UTF-8
+CODECFORSRC = UTF-8

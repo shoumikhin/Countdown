@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Setup Countdown</string>
+   <string>Timer setup</string>
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">
@@ -110,7 +110,7 @@ p, li { white-space: pre-wrap; }
       <string>Count down from now to the time's been set</string>
      </property>
      <property name="text">
-      <string>...</string>
+      <string/>
      </property>
      <property name="icon">
       <iconset resource="resources.qrc">
@@ -150,7 +150,7 @@ p, li { white-space: pre-wrap; }
       <string>Invert colors</string>
      </property>
      <property name="text">
-      <string>...</string>
+      <string/>
      </property>
      <property name="icon">
       <iconset resource="resources.qrc">
