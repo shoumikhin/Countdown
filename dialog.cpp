@@ -10,6 +10,8 @@ Dialog::Dialog(QWidget *parent)
     ui->setupUi(this);
 
     connect(ui->options, SIGNAL(toggled(bool)), this, SLOT(changePalette(bool)));
+    connect(ui->untilLimit, SIGNAL(toggled(bool)), this, SLOT(untilLimitToggled(bool)));
+    connect(ui->countdown, SIGNAL(toggled(bool)), this, SLOT(countdownToggled(bool)));
 }
 
 void Dialog::accept()
@@ -19,6 +21,18 @@ void Dialog::accept()
     _window->setShowSeconds(ui->seconds->isChecked());
     _window->setTime(ui->timeEdit->time(), ui->untilLimit->isChecked());
     _window->showFullScreen();
+}
+
+void Dialog::countdownToggled(bool toggled)
+{
+    if (!toggled)
+        ui->untilLimit->setChecked(toggled);
+}
+
+void Dialog::untilLimitToggled(bool toggled)
+{
+    if (toggled)
+        ui->countdown->setChecked(toggled);
 }
 
 void Dialog::changePalette(bool variant)

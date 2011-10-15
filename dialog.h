@@ -22,6 +22,8 @@ public slots:
     void accept();
 
 private slots:
+    void countdownToggled(bool);
+    void untilLimitToggled(bool);
     void changePalette(bool);
 
 private:
