@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     , _indicator(COLUMN)
 {
     ui->setupUi(this);
+    setFocusPolicy(Qt::StrongFocus);
 
     _timer.setInterval(500);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(timeout()));
@@ -111,7 +112,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
                 {
                     QTime diff = timeDifference(_timeLimit, QTime::currentTime());
 
-                    if (diff < _time)
+                    if (diff <= _time)
                         _time = diff;
                     else
                     {
