@@ -16,6 +16,10 @@
   <property name="windowTitle">
    <string>Timer</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/images/countdown.png</normaloff>:/images/countdown.png</iconset>
+  </property>
   <property name="toolTip">
    <string/>
   </property>
@@ -112,6 +116,8 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
