@@ -6,12 +6,13 @@
 
 namespace
 {
-static QColor FG_COLOR = Qt::black;
-static QColor BG_COLOR = Qt::white;
-static QColor PAUSE_COLOR = Qt::darkBlue;
-static QColor STOP_COLOR = Qt::red;
-static QChar COLUMN = QChar(':');
-static QChar SPACE = QChar(' ');
+QColor FG_COLOR = Qt::black;
+QColor BG_COLOR = Qt::white;
+QColor PAUSE_COLOR = Qt::darkBlue;
+QColor STOP_COLOR = Qt::red;
+QChar COLUMN = QChar(':');
+QChar SPACE = QChar(' ');
+unsigned DELAY = 500;
 }
 
 MainWindow::MainWindow(QWidget *parent)
@@ -25,27 +26,30 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setFocusPolicy(Qt::StrongFocus);
 
-    _timer.setInterval(500);
+    _timer.setInterval(DELAY);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(timeout()));
 
     stop(PAUSE_COLOR);
 }
 
-QTime MainWindow::timeDifference(QTime end, QTime beginning)
+QTime operator -(QTime const &end, QTime const &beginning)
 {
-    QTime ret;
+#define SEC_MS  1000
+#define MIN_MS  (SEC_MS * 60)
+#define HOUR_MS (MIN_MS * 60)
+#define DAY_MS  (24 * HOUR_MS)
 
-    int seconds = beginning.secsTo(end);
+    int diff = beginning.msecsTo(end);
 
-    if (seconds < 0)
-        seconds = 24 * 3600 + seconds;
+    if (diff < 0)
+        diff = DAY_MS + diff;
 
-    int hours = seconds / 3600;
-    int minutes = (seconds - 3600 * hours) / 60;
+    return QTime(diff / HOUR_MS, (diff % HOUR_MS) / MIN_MS, (diff % MIN_MS) / SEC_MS, diff % SEC_MS);
 
-    ret.setHMS(hours, minutes, seconds % 60);
-
-    return ret;
+#undef SEC_MS
+#undef MIN_MS
+#undef HOUR_MS
+#undef DAY_MS
 }
 
 void MainWindow::setTime(QTime time, bool countToTime)
@@ -55,7 +59,7 @@ void MainWindow::setTime(QTime time, bool countToTime)
     if (_countToTime)
     {
         _timeLimit = time;
-        _time = timeDifference(_timeLimit, QTime::currentTime());
+        _time = _timeLimit - QTime::currentTime();
         start();
     }
     else
@@ -110,7 +114,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             {
                 if (_countToTime)
                 {
-                    QTime diff = timeDifference(_timeLimit, QTime::currentTime());
+                    QTime diff = _timeLimit - QTime::currentTime();
 
                     if (diff <= _time)
                         _time = diff;
@@ -133,6 +137,17 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::timeout()
 {
+    static QTime s_prev_current_time = QTime::currentTime();
+    int msecs_spent = (QTime::currentTime() - s_prev_current_time).msec();
+    int msecs_overhead = msecs_spent > DELAY ? msecs_spent - DELAY : 0;
+
+    _time = _time.addMSecs(_countDown ? - msecs_overhead : msecs_overhead);
+
+    qDebug("%s.%i", _time.toString().toStdString().c_str(), _time.msec());
+    qDebug("%s.%i\n", QTime::currentTime().toString().toStdString().c_str(), QTime::currentTime().msec());
+
+    s_prev_current_time = QTime::currentTime();
+
     if (COLUMN == _indicator)
     {
         _indicator = SPACE;
