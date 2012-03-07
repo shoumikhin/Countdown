@@ -29,7 +29,6 @@ private slots:
     void timeout();
 
 private :
-    QTime timeDifference(QTime end, QTime beginning);
     void start();
     void stop(QColor color);
     void update();
