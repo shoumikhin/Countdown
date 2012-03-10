@@ -29,6 +29,7 @@ private slots:
     void onShowClockButton(bool);
     void onShowSecondsButton(bool);
     void onInvertColorsButton(bool);
+    void onSoundButton(bool);
 
 private:
     Ui::Dialog *ui;

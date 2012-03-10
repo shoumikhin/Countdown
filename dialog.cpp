@@ -15,6 +15,7 @@ Dialog::Dialog(QWidget *parent)
     connect(ui->showClockButton, SIGNAL(toggled(bool)), this, SLOT(onShowClockButton(bool)));
     connect(ui->showSecondsButton, SIGNAL(toggled(bool)), this, SLOT(onShowSecondsButton(bool)));
     connect(ui->invertColorsButton, SIGNAL(toggled(bool)), this, SLOT(onInvertColorsButton(bool)));
+    connect(ui->soundButton, SIGNAL(toggled(bool)), this, SLOT(onSoundButton(bool)));
 }
 //------------------------------------------------------------------------------
 void Dialog::accept()
@@ -63,6 +64,11 @@ void Dialog::onShowSecondsButton(bool toggled)
 void Dialog::onInvertColorsButton(bool toggled)
 {
     _window->invertColors(toggled);
+}
+//------------------------------------------------------------------------------
+void Dialog::onSoundButton(bool toggled)
+{
+    _window->setPlaySound(toggled);
 }
 //------------------------------------------------------------------------------
 Dialog::~Dialog()

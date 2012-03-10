@@ -32,6 +32,7 @@ public:
     void setShowClock(bool);
     void setShowSeconds(bool);
     void invertColors(bool);
+    void setPlaySound(bool);
 
     void pause();
     void start();
@@ -57,6 +58,7 @@ private :
     bool _countDown;
     bool _countToTime;
     bool _showSeconds;
+    bool _playSound;
     QColor _foregroundColor;
     QColor _backgroundColor;
     QString _timeTemplate;

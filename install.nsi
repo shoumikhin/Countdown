@@ -14,6 +14,7 @@ section
     file "Countdown.exe"
     file "QtCore4.dll"
     file "QtGui4.dll"
+    file "msvcr100.dll"
 
     writeUninstaller "$INSTDIR\uninstall.exe"
 
@@ -32,6 +33,7 @@ section "Uninstall"
     delete "$INSTDIR\Countdown.exe"
     delete "$INSTDIR\QtCore4.dll"
     delete "$INSTDIR\QtGui4.dll"
+    delete "$INSTDIR\msvcr100.dll"
     delete "$INSTDIR\uninstall.exe"
     rmDir "$INSTDIR"
 

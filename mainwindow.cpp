@@ -3,6 +3,7 @@
 
 #include <QEvent>
 #include <QKeyEvent>
+#include <QSound>
 
 #include "QTimeUtils.h"
 
@@ -29,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
     , _countDown(true)
     , _countToTime(true)
     , _showSeconds(true)
+    , _playSound(true)
     , _foregroundColor(COLOR_BG)
     , _backgroundColor(COLOR_FG)
     , _timeTemplate(TIME_TEMPALTE_SECONDS)
@@ -86,6 +88,11 @@ void MainWindow::invertColors(bool invert)
     _backgroundColor = invert ? COLOR_FG : COLOR_BG;
 
     paint();
+}
+//------------------------------------------------------------------------------
+void MainWindow::setPlaySound(bool sound)
+{
+     _playSound = sound;
 }
 //------------------------------------------------------------------------------
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -241,7 +248,15 @@ void MainWindow::updateCounter(QTime &currentTime, QTime &previousTime)
 
         case Firing :
 
-            ui->counterLCDNumber->display((currentTime.msec() / TIMER_HALF_SECOND) % 2 ? QString() : _timeOnCounter.toString(QString(_timeTemplate).arg(INDICATOR_COLUMN)));
+            if ((currentTime.msec() / TIMER_HALF_SECOND) % 2)
+            {
+                if (_playSound)
+                    QSound::play("sounds/alarm.wav");
+
+                ui->counterLCDNumber->display("");
+            }
+            else
+                ui->counterLCDNumber->display(_timeOnCounter.toString(QString(_timeTemplate).arg(INDICATOR_COLUMN)));
 
         break;
     }
