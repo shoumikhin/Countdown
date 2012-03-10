@@ -8,6 +8,7 @@ Dialog::Dialog(QWidget *parent)
     , _window(new MainWindow(parent))
 {
     ui->setupUi(this);
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     connect(ui->countDownButton, SIGNAL(toggled(bool)), this, SLOT(onCountDownButton(bool)));
     connect(ui->countToTimeButton, SIGNAL(toggled(bool)), this, SLOT(onCountToTimeButton(bool)));
