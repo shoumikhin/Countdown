@@ -5,10 +5,19 @@
 #include <QTimer>
 #include <QTime>
 
-namespace Ui {
+//==============================================================================
+namespace Ui
+{
     class MainWindow;
 }
-
+//==============================================================================
+enum CounterState
+{
+    Paused,
+    Running,
+    Firing
+};
+//==============================================================================
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -17,31 +26,44 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void setTime(QTime time, bool countToTime = false);
-    void setCountDown(bool countDown);
-    void setShowSeconds(bool showSeconds);
-    void setColorPalette(QColor foreground, QColor background);
+    void setTime(QTime);
+    void setCountDown(bool);
+    void setCountToTime(bool);
+    void setShowClock(bool);
+    void setShowSeconds(bool);
+    void invertColors(bool);
+
+    void pause();
+    void start();
+    void fire();
 
 protected:
-    void keyPressEvent(QKeyEvent *event);
+    void keyPressEvent(QKeyEvent *);
+    void showEvent(QShowEvent *);
+    void hideEvent(QHideEvent *);
 
 private slots:
     void timeout();
 
 private :
-    void start();
-    void stop(QColor color);
-    void update();
-    void setColor(QColor color);
+    void paint();
+    void updateClock(QTime &);
+    void updateCounter(QTime &, QTime &);
+    void runStep(QTime &, QTime &);
 
-private:
+private :
     Ui::MainWindow *ui;
-    QTimer _timer;
-    QTime _time, _timeLimit;
+    CounterState _state;
     bool _countDown;
     bool _countToTime;
     bool _showSeconds;
-    QChar _indicator;
+    QColor _foregroundColor;
+    QColor _backgroundColor;
+    QString _timeTemplate;
+    QTime _timeOnCounter;
+    QTime _timeFrozenOnCounter;
+    QTime _time;
+    QTimer _timer;
 };
-
+//==============================================================================
 #endif // MAINWINDOW_H

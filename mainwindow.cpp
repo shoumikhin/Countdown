@@ -4,96 +4,90 @@
 #include <QEvent>
 #include <QKeyEvent>
 
-namespace
-{
-QColor FG_COLOR = Qt::black;
-QColor BG_COLOR = Qt::white;
-QColor PAUSE_COLOR = Qt::darkBlue;
-QColor STOP_COLOR = Qt::red;
-QChar COLUMN = QChar(':');
-QChar SPACE = QChar(' ');
-unsigned DELAY = 500;
-}
+#include "QTimeUtils.h"
 
+#define COLOR_FG Qt::black
+#define COLOR_BG Qt::white
+#define COLOR_PAUSED Qt::darkBlue
+#define COLOR_FIRING Qt::red
+#define COLOR_CLOCK Qt::darkGreen
+#define INDICATOR_COLUMN QChar(':')
+#define INDICATOR_SPACE QChar(' ')
+#define TIMER_INTERVAL 100
+#define TIMER_SECOND 1000
+#define TIMER_HALF_SECOND (TIMER_SECOND / 2)
+#define TIME_TEMPALTE "hh%1mm"
+#define TIME_TEMPALTE_LENGTH 5
+#define TIME_TEMPALTE_SECONDS "hh%1mm%1ss"
+#define TIME_TEMPALTE_SECONDS_LENGTH 8
+
+//==============================================================================
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , _state(Paused)
     , _countDown(true)
-    , _countToTime(false)
+    , _countToTime(true)
     , _showSeconds(true)
-    , _indicator(COLUMN)
+    , _foregroundColor(COLOR_BG)
+    , _backgroundColor(COLOR_FG)
+    , _timeTemplate(TIME_TEMPALTE_SECONDS)
 {
     ui->setupUi(this);
     setFocusPolicy(Qt::StrongFocus);
+    paint();
 
-    _timer.setInterval(DELAY);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(timeout()));
-
-    stop(PAUSE_COLOR);
+    _timer.setInterval(TIMER_INTERVAL);
 }
-
-QTime operator -(QTime const &end, QTime const &beginning)
+//------------------------------------------------------------------------------
+MainWindow::~MainWindow()
 {
-#define SEC_MS  1000
-#define MIN_MS  (SEC_MS * 60)
-#define HOUR_MS (MIN_MS * 60)
-#define DAY_MS  (24 * HOUR_MS)
+    _timer.stop();
 
-    int diff = beginning.msecsTo(end);
-
-    if (diff < 0)
-        diff = DAY_MS + diff;
-
-    return QTime(diff / HOUR_MS, (diff % HOUR_MS) / MIN_MS, (diff % MIN_MS) / SEC_MS, diff % SEC_MS);
-
-#undef SEC_MS
-#undef MIN_MS
-#undef HOUR_MS
-#undef DAY_MS
+    delete ui;
 }
-
-void MainWindow::setTime(QTime time, bool countToTime)
+//------------------------------------------------------------------------------
+void MainWindow::setTime(QTime time)
 {
-    _countToTime = countToTime;
-
-    if (_countToTime)
-    {
-        _timeLimit = time;
-        _time = _timeLimit - QTime::currentTime();
-        start();
-    }
-    else
-    {
-        _time = time;
-        stop(PAUSE_COLOR);
-    }
+    _time = time;
+    _timeOnCounter = _countToTime ? _time - QTime::currentTime() : _time;
+    _timeFrozenOnCounter = _timeOnCounter;
 }
-
+//------------------------------------------------------------------------------
 void MainWindow::setCountDown(bool countDown)
 {
     _countDown = countDown;
-    stop(PAUSE_COLOR);
+    setTime(_time);
+    pause();
 }
-
+//------------------------------------------------------------------------------
+void MainWindow::setCountToTime(bool countToTime)
+{
+    _countToTime = countToTime;
+    setTime(_time);
+    pause();
+}
+//------------------------------------------------------------------------------
+void MainWindow::setShowClock(bool showClock)
+{
+    ui->clockLCDNumber->setVisible(showClock);
+}
+//------------------------------------------------------------------------------
 void MainWindow::setShowSeconds(bool showSeconds)
 {
     _showSeconds = showSeconds;
-    stop(PAUSE_COLOR);
+    _timeTemplate = _showSeconds ? TIME_TEMPALTE_SECONDS : TIME_TEMPALTE;
 }
-
-void MainWindow::setColorPalette(QColor foreground, QColor background)
+//------------------------------------------------------------------------------
+void MainWindow::invertColors(bool invert)
 {
-    FG_COLOR = foreground;
-    BG_COLOR = background;
+    _foregroundColor = invert ? COLOR_BG : COLOR_FG;
+    _backgroundColor = invert ? COLOR_FG : COLOR_BG;
 
-    QPalette palette;
-
-    palette.setColor(QPalette::Foreground, FG_COLOR);
-    palette.setColor(QPalette::Window, BG_COLOR);
-    ui->lcdNumber->setPalette(palette);
-    setPalette(palette);
+    paint();
 }
-
+//------------------------------------------------------------------------------
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key())
@@ -101,6 +95,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         case Qt::Key_Escape :
 
             close();
+            event->setAccepted(true);
 
             break;
 
@@ -108,106 +103,171 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         case Qt::Key_Enter :
         case Qt::Key_Return :
 
-            if (_timer.isActive())
-                stop(PAUSE_COLOR);
-            else
+            switch (_state)
             {
-                if (_countToTime)
-                {
-                    QTime diff = _timeLimit - QTime::currentTime();
+                case Paused :
 
-                    if (diff <= _time)
-                        _time = diff;
-                    else
-                    {
-                        _time.setHMS(0, 0, 0);
-                        stop(STOP_COLOR);
-                        _countToTime = false;
+                    start();
 
-                        break;
-                    }
-                }
+                    break;
 
-                start();
+                case Running :
+
+                    pause();
+
+                    break;
+
+                case Firing :
+
+                    break;
             }
+
+            event->setAccepted(true);
 
             break;
     }
 }
-
-void MainWindow::timeout()
-{
-    static QTime s_prev_current_time = QTime::currentTime();
-    int msecs_spent = (QTime::currentTime() - s_prev_current_time).msec();
-    int msecs_overhead = msecs_spent > DELAY ? msecs_spent - DELAY : 0;
-
-    _time = _time.addMSecs(_countDown ? - msecs_overhead : msecs_overhead);
-
-    qDebug("%s.%i", _time.toString().toStdString().c_str(), _time.msec());
-    qDebug("%s.%i\n", QTime::currentTime().toString().toStdString().c_str(), QTime::currentTime().msec());
-
-    s_prev_current_time = QTime::currentTime();
-
-    if (COLUMN == _indicator)
-    {
-        _indicator = SPACE;
-
-        if (_countDown)
-            if (_time.second() || _time.minute() || _time.hour())
-                _time = _time.addSecs(-1);
-            else
-            {
-                stop(STOP_COLOR);
-                _countToTime = false;
-            }
-        else
-            _time = _time.addSecs(1);
-    }
-    else
-        _indicator = COLUMN;
-
-    update();
-}
-
-void MainWindow::start()
+//------------------------------------------------------------------------------
+void MainWindow::showEvent(QShowEvent *)
 {
     _timer.start();
-    setColor(FG_COLOR);
-    update();
 }
-
-void MainWindow::stop(QColor color)
+//------------------------------------------------------------------------------
+void MainWindow::hideEvent(QHideEvent *)
 {
     _timer.stop();
-    _indicator = COLUMN;
-    setColor(color);
-    update();
 }
-
-void MainWindow::update()
+//------------------------------------------------------------------------------
+void MainWindow::timeout()
 {
-    if (_showSeconds)
-    {
-        ui->lcdNumber->setDigitCount(_time.hour() ? 8 : 5);
-        ui->lcdNumber->display(_time.toString(QString("hh%1mm%1ss").arg(_indicator)));
+    static QTime previous_time = QTime::currentTime();
+    QTime current_time = QTime::currentTime();
 
-    }
-    else
-    {
-        ui->lcdNumber->setDigitCount(5);
-        ui->lcdNumber->display(_time.toString(QString("hh%1mm").arg(_indicator)));
-    }
+    updateCounter(current_time, previous_time);
+    updateClock(current_time);
+
+    previous_time = current_time;
 }
+//------------------------------------------------------------------------------
+void MainWindow::pause()
+{
+    _timeFrozenOnCounter = _countDown ? _time - QTime::currentTime() : _timeOnCounter;
+    _state = Paused;
+    paint();
+}
+//------------------------------------------------------------------------------
+void MainWindow::start()
+{
+    if (_countToTime)
+    {
+        if (_timeFrozenOnCounter < _time - QTime::currentTime())
+        {
+            _timeOnCounter.setHMS(0, 0, 0);
+            fire();
 
-void MainWindow::setColor(QColor color)
+            return;
+        }
+
+        _timeOnCounter = _time - QTime::currentTime();
+    }
+
+    _state = Running;
+    paint();
+}
+//------------------------------------------------------------------------------
+void MainWindow::fire()
+{
+    _state = Firing;
+    paint();
+}
+//------------------------------------------------------------------------------
+void MainWindow::paint()
 {
     QPalette palette;
 
-    palette.setColor(QPalette::Foreground, color);
-    ui->lcdNumber->setPalette(palette);
-}
+    palette.setColor(QPalette::Window, _backgroundColor);
+    palette.setColor(QPalette::Light, _backgroundColor);
+    palette.setColor(QPalette::Dark, _backgroundColor);
+    palette.setColor(QPalette::Foreground, _foregroundColor);
+    setPalette(palette);
 
-MainWindow::~MainWindow()
-{
-    delete ui;
+    switch (_state)
+    {
+        case Paused :
+
+            palette.setColor(QPalette::Foreground, COLOR_PAUSED);
+
+            break;
+
+        case Firing :
+
+            palette.setColor(QPalette::Foreground, COLOR_FIRING);
+
+            break;
+
+        default :
+
+            palette.setColor(QPalette::Foreground, _foregroundColor);
+    }
+
+    ui->counterLCDNumber->setPalette(palette);
+
+    palette.setColor(QPalette::Foreground, COLOR_CLOCK);
+    ui->clockLCDNumber->setPalette(palette);
 }
+//------------------------------------------------------------------------------
+void MainWindow::updateClock(QTime &currentTime)
+{
+    ui->clockLCDNumber->display(currentTime.toString(QString(_timeTemplate).arg((currentTime.msec() / TIMER_HALF_SECOND) % 2 ? INDICATOR_SPACE : INDICATOR_COLUMN)));
+    ui->clockLCDNumber->setDigitCount(_showSeconds ? TIME_TEMPALTE_SECONDS_LENGTH : TIME_TEMPALTE_LENGTH);
+}
+//------------------------------------------------------------------------------
+void MainWindow::updateCounter(QTime &currentTime, QTime &previousTime)
+{
+    switch (_state)
+    {
+        case Paused :
+
+            ui->counterLCDNumber->display(_timeOnCounter.toString(QString(_timeTemplate).arg(INDICATOR_COLUMN)));
+
+        break;
+
+        case Running :
+
+            runStep(currentTime, previousTime);
+            ui->counterLCDNumber->display(_timeOnCounter.toString(QString(_timeTemplate).arg((_timeOnCounter.msec() / TIMER_HALF_SECOND) % 2 ? INDICATOR_COLUMN : INDICATOR_SPACE)));
+
+        break;
+
+        case Firing :
+
+            ui->counterLCDNumber->display((currentTime.msec() / TIMER_HALF_SECOND) % 2 ? QString() : _timeOnCounter.toString(QString(_timeTemplate).arg(INDICATOR_COLUMN)));
+
+        break;
+    }
+
+    if (0 == _timeOnCounter.hour())
+        ui->counterLCDNumber->setDigitCount(TIME_TEMPALTE_LENGTH);
+    else
+        ui->counterLCDNumber->setDigitCount(_showSeconds ? TIME_TEMPALTE_SECONDS_LENGTH : TIME_TEMPALTE_LENGTH);
+}
+//------------------------------------------------------------------------------
+void MainWindow::runStep(QTime &currentTime, QTime &previousTime)
+{
+    int time_passed = (currentTime - previousTime).msec();
+
+    if (_countDown)
+    {
+        if (QTime().msecsTo(_timeOnCounter) <= time_passed)
+        {
+            fire();
+
+            return;
+        }
+
+        time_passed = -time_passed;
+    }
+
+    _timeOnCounter = _timeOnCounter.addMSecs(time_passed);
+}
+//==============================================================================

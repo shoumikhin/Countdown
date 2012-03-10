@@ -6,10 +6,12 @@
 
 #include "mainwindow.h"
 
-namespace Ui {
+//==============================================================================
+namespace Ui
+{
     class Dialog;
 }
-
+//==============================================================================
 class Dialog : public QDialog
 {
     Q_OBJECT
@@ -22,14 +24,16 @@ public slots:
     void accept();
 
 private slots:
-    void countdownToggled(bool);
-    void untilLimitToggled(bool);
-    void changePalette(bool);
+    void onCountDownButton(bool);
+    void onCountToTimeButton(bool);
+    void onShowClockButton(bool);
+    void onShowSecondsButton(bool);
+    void onInvertColorsButton(bool);
 
 private:
     Ui::Dialog *ui;
     MainWindow *_window;
-    QColorDialog *_colorDialog;
 };
+//==============================================================================
 
 #endif // DIALOG_H

@@ -48,16 +48,21 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="dialog.ui" line="122"/>
+        <source>Show current time</source>
+        <translation>Показывать текущее время</translation>
+    </message>
+    <message>
+        <location filename="dialog.ui" line="142"/>
         <source>Show seconds</source>
         <translation>Показывать секунды</translation>
     </message>
     <message>
-        <location filename="dialog.ui" line="142"/>
+        <location filename="dialog.ui" line="162"/>
         <source>Invert colors</source>
         <translation>Инвертировать цвета</translation>
     </message>
     <message>
-        <location filename="dialog.ui" line="178"/>
+        <location filename="dialog.ui" line="198"/>
         <source>Start timer</source>
         <translation>Запустить таймер</translation>
     </message>

@@ -1,27 +1,25 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2011-10-07T22:57:20
-#
-#-------------------------------------------------
-
-QT       += core gui
+QT += core gui
 
 TEMPLATE = app
 
 TARGET = Countdown
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    dialog.cpp
+SOURCES += \
+           main.cpp \
+           dialog.cpp \
+           mainwindow.cpp
 
-HEADERS  += mainwindow.h \
-    dialog.h
+HEADERS += \
+           mainwindow.h \
+           dialog.h \
+           QTimeUtils.h
 
-FORMS    += mainwindow.ui \
-    dialog.ui
+FORMS += \
+         mainwindow.ui \
+         dialog.ui
 
 RESOURCES += \
-    resources.qrc
+             resources.qrc
 
 TRANSLATIONS = countdown_ru.ts
 CODECFORTR = UTF-8
@@ -36,3 +34,5 @@ macx\
 {
 ICON = countdown.icns
 }
+
+
