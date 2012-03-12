@@ -17,7 +17,7 @@
 #define INDICATOR_SPACE QChar(' ')
 #define TIMER_SECOND 1000
 #define TIMER_HALF_SECOND (TIMER_SECOND / 2)
-#define TIMER_INTERVAL (TIMER_SECOND / 10)
+#define TIMER_INTERVAL (TIMER_SECOND / 20)
 #define TIME_TEMPALTE "hh%1mm"
 #define TIME_TEMPALTE_LENGTH 5
 #define TIME_TEMPALTE_SECONDS "hh%1mm%1ss"
@@ -256,13 +256,23 @@ void MainWindow::updateCounter(QTime &currentTime, QTime &previousTime)
 
         case Firing :
 
-            if ((currentTime.msec() / TIMER_HALF_SECOND) % 2)
+            static bool play;
+
+            if (currentTime.msec() / TIMER_HALF_SECOND)
+            {
                 ui->counterLCDNumber->display("");
+                play = true;
+            }
             else
+            {
                 ui->counterLCDNumber->display(_timeOnCounter.toString(QString(_timeTemplate).arg(INDICATOR_COLUMN)));
 
-            if (_playSound && !(currentTime.msec() / TIMER_INTERVAL))
-                QSound::play(_sound.fileName());
+                if (_playSound && play)
+                {
+                    QSound::play(_sound.fileName());
+                    play = false;
+                }
+            }
 
         break;
     }
