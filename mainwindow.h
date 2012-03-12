@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QTime>
+#include <QTemporaryFile>
 
 //==============================================================================
 namespace Ui
@@ -66,6 +67,7 @@ private :
     QTime _timeFrozenOnCounter;
     QTime _time;
     QTimer _timer;
+    QTemporaryFile _sound;
 };
 //==============================================================================
 #endif // MAINWINDOW_H

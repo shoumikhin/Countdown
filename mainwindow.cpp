@@ -4,6 +4,7 @@
 #include <QEvent>
 #include <QKeyEvent>
 #include <QSound>
+#include <QResource>
 
 #include "QTimeUtils.h"
 
@@ -14,9 +15,9 @@
 #define COLOR_CLOCK Qt::darkGreen
 #define INDICATOR_COLUMN QChar(':')
 #define INDICATOR_SPACE QChar(' ')
-#define TIMER_INTERVAL 100
 #define TIMER_SECOND 1000
 #define TIMER_HALF_SECOND (TIMER_SECOND / 2)
+#define TIMER_INTERVAL (TIMER_SECOND / 10)
 #define TIME_TEMPALTE "hh%1mm"
 #define TIME_TEMPALTE_LENGTH 5
 #define TIME_TEMPALTE_SECONDS "hh%1mm%1ss"
@@ -41,6 +42,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(&_timer, SIGNAL(timeout()), this, SLOT(timeout()));
     _timer.setInterval(TIMER_INTERVAL);
+
+    QResource alarm(":/sounds/alarm.wav");
+
+    _sound.open();
+    _sound.write((char *)alarm.data(), alarm.size());
+    _sound.flush();
+    _sound.close();
 }
 //------------------------------------------------------------------------------
 MainWindow::~MainWindow()
@@ -249,14 +257,12 @@ void MainWindow::updateCounter(QTime &currentTime, QTime &previousTime)
         case Firing :
 
             if ((currentTime.msec() / TIMER_HALF_SECOND) % 2)
-            {
-                if (_playSound)
-                    QSound::play("sounds/alarm.wav");
-
                 ui->counterLCDNumber->display("");
-            }
             else
                 ui->counterLCDNumber->display(_timeOnCounter.toString(QString(_timeTemplate).arg(INDICATOR_COLUMN)));
+
+            if (_playSound && !(currentTime.msec() / TIMER_INTERVAL))
+                QSound::play(_sound.fileName());
 
         break;
     }
