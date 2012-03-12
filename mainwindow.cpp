@@ -17,12 +17,14 @@
 #define INDICATOR_SPACE QChar(' ')
 #define TIMER_SECOND 1000
 #define TIMER_HALF_SECOND (TIMER_SECOND / 2)
-#define TIMER_INTERVAL (TIMER_SECOND / 20)
+#define TIMER_INTERVAL (TIMER_SECOND / 10)
 #define TIME_TEMPALTE "hh%1mm"
 #define TIME_TEMPALTE_LENGTH 5
 #define TIME_TEMPALTE_SECONDS "hh%1mm%1ss"
 #define TIME_TEMPALTE_SECONDS_LENGTH 8
 
+//==============================================================================
+QTime MainWindow::s_previousTime;
 //==============================================================================
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -145,6 +147,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 //------------------------------------------------------------------------------
 void MainWindow::showEvent(QShowEvent *)
 {
+    s_previousTime = QTime::currentTime();
     _timer.start();
 }
 //------------------------------------------------------------------------------
@@ -155,18 +158,17 @@ void MainWindow::hideEvent(QHideEvent *)
 //------------------------------------------------------------------------------
 void MainWindow::timeout()
 {
-    static QTime previous_time = QTime::currentTime();
     QTime current_time = QTime::currentTime();
 
-    updateCounter(current_time, previous_time);
+    updateCounter(current_time, s_previousTime);
     updateClock(current_time);
 
-    previous_time = current_time;
+    s_previousTime = current_time;
 }
 //------------------------------------------------------------------------------
 void MainWindow::pause()
 {
-    _timeFrozenOnCounter = _countDown ? _time - QTime::currentTime() : _timeOnCounter;
+    _timeFrozenOnCounter = _countToTime ? _time - QTime::currentTime() : _timeOnCounter;
     _state = Paused;
     paint();
 }
@@ -175,15 +177,15 @@ void MainWindow::start()
 {
     if (_countToTime)
     {
-        if (_timeFrozenOnCounter < _time - QTime::currentTime())
+        _timeOnCounter = _time - QTime::currentTime();
+
+        if (_timeFrozenOnCounter < _timeOnCounter || QTime().msecsTo(_timeOnCounter) < TIMER_INTERVAL)
         {
             _timeOnCounter.setHMS(0, 0, 0);
             fire();
 
             return;
         }
-
-        _timeOnCounter = _time - QTime::currentTime();
     }
 
     _state = Running;
@@ -233,7 +235,7 @@ void MainWindow::paint()
 //------------------------------------------------------------------------------
 void MainWindow::updateClock(QTime &currentTime)
 {
-    ui->clockLCDNumber->display(currentTime.toString(QString(_timeTemplate).arg((currentTime.msec() / TIMER_HALF_SECOND) % 2 ? INDICATOR_SPACE : INDICATOR_COLUMN)));
+    ui->clockLCDNumber->display(currentTime.toString(QString(_timeTemplate).arg(currentTime.msec() / TIMER_HALF_SECOND ? INDICATOR_SPACE : INDICATOR_COLUMN)));
     ui->clockLCDNumber->setDigitCount(_showSeconds ? TIME_TEMPALTE_SECONDS_LENGTH : TIME_TEMPALTE_LENGTH);
 }
 //------------------------------------------------------------------------------
@@ -250,29 +252,14 @@ void MainWindow::updateCounter(QTime &currentTime, QTime &previousTime)
         case Running :
 
             runStep(currentTime, previousTime);
-            ui->counterLCDNumber->display(_timeOnCounter.toString(QString(_timeTemplate).arg((_timeOnCounter.msec() / TIMER_HALF_SECOND) % 2 ? INDICATOR_COLUMN : INDICATOR_SPACE)));
+            ui->counterLCDNumber->display(_timeOnCounter.toString(QString(_timeTemplate).arg(_timeOnCounter.msec() / TIMER_HALF_SECOND ? INDICATOR_COLUMN : INDICATOR_SPACE)));
 
         break;
 
         case Firing :
 
-            static bool play;
-
-            if (currentTime.msec() / TIMER_HALF_SECOND)
-            {
-                ui->counterLCDNumber->display("");
-                play = true;
-            }
-            else
-            {
-                ui->counterLCDNumber->display(_timeOnCounter.toString(QString(_timeTemplate).arg(INDICATOR_COLUMN)));
-
-                if (_playSound && play)
-                {
-                    QSound::play(_sound.fileName());
-                    play = false;
-                }
-            }
+            fireStep(currentTime, previousTime);
+            ui->counterLCDNumber->display(QTime::currentTime().msec() / TIMER_HALF_SECOND ? "" : _timeOnCounter.toString(QString(_timeTemplate).arg(INDICATOR_COLUMN)));
 
         break;
     }
@@ -285,20 +272,35 @@ void MainWindow::updateCounter(QTime &currentTime, QTime &previousTime)
 //------------------------------------------------------------------------------
 void MainWindow::runStep(QTime &currentTime, QTime &previousTime)
 {
-    int time_passed = (currentTime - previousTime).msec();
+    int msec_passed = (currentTime - previousTime).msec();
 
     if (_countDown)
     {
-        if (QTime().msecsTo(_timeOnCounter) <= time_passed)
+        if (QTime().msecsTo(_timeOnCounter) <= msec_passed)
         {
             fire();
 
             return;
         }
 
-        time_passed = -time_passed;
+        msec_passed = -msec_passed;
     }
 
-    _timeOnCounter = _timeOnCounter.addMSecs(time_passed);
+    _timeOnCounter = _timeOnCounter.addMSecs(msec_passed);
+}
+//------------------------------------------------------------------------------
+void MainWindow::fireStep(QTime &currentTime, QTime &previousTime)
+{
+    static int msec_passed = TIMER_SECOND;
+
+    msec_passed += (currentTime - previousTime).msec();
+
+    if (msec_passed >= TIMER_SECOND)
+    {
+        if (_playSound)
+            QSound::play(_sound.fileName());
+
+        msec_passed = 0;
+    }
 }
 //==============================================================================

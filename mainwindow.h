@@ -52,6 +52,7 @@ private :
     void updateClock(QTime &);
     void updateCounter(QTime &, QTime &);
     void runStep(QTime &, QTime &);
+    void fireStep(QTime &, QTime &);
 
 private :
     Ui::MainWindow *ui;
@@ -68,6 +69,9 @@ private :
     QTime _time;
     QTimer _timer;
     QTemporaryFile _sound;
+
+private :
+    static QTime s_previousTime;
 };
 //==============================================================================
 #endif // MAINWINDOW_H
