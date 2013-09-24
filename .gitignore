@@ -1,73 +1,80 @@
-# Mac OS X Finder
+# Project specific
 
-.DS_Store
-
-# Sparkle distribution Private Key (Don’t check me in!)
-
-dsa_priv.pem
-
-# XCode (and ancestors) per-user config (very noisy, and not relevant)
-
-*.mode1
-
-*.mode1v3
-
-*.mode2v3
-
-*.perspective
-
-*.perspectivev3
-
-*.pbxuser
-
-# Xcode 4
-
-xcuserdata/
-
-project.xcworkspace/
-
-# QtCreator
-
-*.pro.user
-
-*.autosave
-
-moc_*
-
-qrc_*
-
-ui_*
-
-# Generated files
-
-VersionX-revision.h
-
-# build products
-
-build/
+# Build products
 
 *.[oa]
+DerivedData/
+[Bb]uild/
+[Pp]re-[Bb]uild/
+[Dd]eliverables/
+[Dd]istribution/
+[Dd]ocumentation/
 
-# Other source repository archive directories (protects when importing)
-
-.hg
-
-.svn
-
-CVS
-
-# automatic backup files
-
-*~.nib
-
-*.swp
+# Backup files
 
 *~
-
+*~.nib
+*.swp
 *(Autosaved).rtfd/
-
 Backup[ ]of[ ]*.pages/
-
 Backup[ ]of[ ]*.key/
-
 Backup[ ]of[ ]*.numbers/
+
+# Other VCS
+
+.hg
+.svn
+*.prej
+*.mine
+CVS
+
+# MacOSX Finder
+
+.DS_Store
+.DS_Store?
+._*
+.~*
+~$*
+*.lock
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Xcode
+
+xcuserdata/
+project.xcworkspace/
+*.mode1
+*.mode1v3
+*.mode2v3
+*.perspective
+*.perspectivev3
+*.pbxuser
+
+# JetBrains
+
+.idea/workspace.xml
+.idea/tasks.xml
+
+# Qt
+
+*.pro.user
+*.autosave
+moc_*
+qrc_*
+ui_*
+
+# CocoaPods
+
+!Podfile.lock
+!Pods/Manifest.lock
+Pods/Documentation
+
+# Gems
+
+!Gemfile.lock
+
+# VersionX
+
+VersionX-revision.h
